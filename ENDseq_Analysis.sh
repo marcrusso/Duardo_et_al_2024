@@ -1,0 +1,63 @@
+#FastQC of reads 
+$ for i in *.fastq.gz  
+do  
+fastqc -o ./FASTQC $i -t 8  
+done  
+
+#Trimming of adapters: 
+$ for i in `cat samples.txt.txt` 
+do 
+SAMPLE=`basename $i _R1.fastq.gz` 
+PAIR1=$SAMPLE"_R1.fastq.gz" 
+PAIR2=$SAMPLE"_R2.fastq.gz" 
+trim_galore $PAIR1 $PAIR2 --paired --illumina --fastqc -o ../TRIMMED/ 
+done 
+
+#Alignment of FASTQ reads that passed the validation of length after trimming to hg19 and mm10 assemblies: 
+THR=8 
+for i in `cat samples_trimmed.txt ` 
+do  
+SAMPLE=`basename $i _R1_val_1.fq.gz` 
+PAIR1=$SAMPLE"_R1_val_1" 
+PAIR2=$SAMPLE"_R2_val_2" 
+echo $SAMPLE 
+bowtie2 -p $THR -q --end-to-end -x ../Bowtie2_index/hg19/hg19.fa -1 $PAIR1 -2 $PAIR2 | samtools view -bS --threads 8 | samtools sort --threads 8 -o ../BAM_files_hg19/$SAMPLE".sorted.bam"  
+done 
+
+#properly pair reads:
+for i in *.bam  
+do 
+SAMPLE=$(basename $i .sorted.bam) 
+samtools view  -f 2 -F 512 -b -o ./PP_BAM_mm10/$SAMPLE"_pp".bam $i 
+done 
+
+#Filtering of aligned reads by MAPQ>30: 
+parallel --jobs 4 samtools view {} -q 30 -o ./MAPQ_filtered_BAM/{} ::: *sorted.bam  
+ 
+#Create indexes for BAM files: 
+parallel samtools index ::: *.bam  
+
+#Peak Calling using MACS2:  
+parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_a_pp.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ../../../Peak_calling_hg19_PP/no_lambda_PP/" ::: *0_a_pp.bam 
+parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_a_pp.bam -g 2652783500 --nomodel --nolambda -q 0.05 --keep-dup all -f BAMPE -n {} -B --outdir ../../../Peak_calling_mm10_PP/no_lambda_PP/" ::: *0_a_pp.bam
+
+#Split properly paired and quality filtered reads in forward (F1R2) and reverse (F2R1), according to first in pair orientation (Blue on the left and Red on the right):  
+for i in *_pp.bam  
+do 
+SAMPLE=$(basename $i .bam) 
+FLAG_FW1=$(echo _fwd99) 
+FLAG_FW2=$(echo _fwd147) 
+FLAG_REV1=$(echo _rev83) 
+FLAG_REV2=$(echo _rev163) 
+echo $i 
+samtools view -f 99 $i -o $SAMPLE$FLAG_FW1.bam 
+echo $SAMPLE$FLAG_FW1 
+samtools view -f 147 $i -o $SAMPLE$FLAG_FW2.bam 
+echo $SAMPLE$FLAG_FW2 
+samtools view -f 83 $i -o $SAMPLE$FLAG_REV1.bam 
+echo $SAMPLE$FLAG_REV1 
+samtools view -f 163 $i -o $SAMPLE$FLAG_REV2.bam 
+echo $SAMPLE$FLAG_REV2 
+samtools merge -f merged_$SAMPLE"_fwd.bam" $SAMPLE$FLAG_FW1.bam $SAMPLE$FLAG_FW2.bam 
+samtools merge -f merged_$SAMPLE"_rev.bam" $SAMPLE$FLAG_REV1.bam $SAMPLE$FLAG_REV2.bam 
+done 
