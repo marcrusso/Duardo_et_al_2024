@@ -70,17 +70,15 @@ samtools merge -f merged_$SAMPLE"_rev.bam" $SAMPLE$FLAG_REV1.bam $SAMPLE$FLAG_RE
 done 
 # --------------------------------
 
-### Peak calling  
-macs2 callpeak -t treated_sample_hg19.bam -c control.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -f BAMPE -B 
-macs2 callpeak -t treated_sample_mm10.bam -c control.bam -g 2652783500 --nomodel --nolambda -q 0.05 --keep-dup all -f BAMPE -B 
+### Peak calling
+#double end DSB
+parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_a_pp.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ../../../Peak_calling_hg19_PP/no_lambda_PP/" ::: *0_a_pp.bam 
+parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_a_pp.bam -g 2652783500 --nomodel --nolambda -q 0.05 --keep-dup all -f BAMPE -n {} -B --outdir ../../../Peak_calling_mm10_PP/no_lambda_PP/" ::: *0_a_pp.bam
+parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_b_pp.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ../../../Peak_calling_hg19_PP/no_lambda_PP/" ::: *0_b_pp.bam 
+parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_b_pp.bam -g 2652783500 --nomodel --nolambda -q 0.05 --keep-dup all -f BAMPE -n {} -B --outdir ../../../Peak_calling_mm10_PP/no_lambda_PP/" ::: *0_b_pp.bam
 
-
-
-
-
-
-
-
+#single end DSB
+parallel --jobs 4 "macs2 callpeak -t {} -c merged_CTRL_a_pp_fwd.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ./Peaks_fwd.rev/peaks.fwd/" ::: *0_a_pp_fwd.bam
 
 
 

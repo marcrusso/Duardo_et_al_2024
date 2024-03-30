@@ -104,7 +104,6 @@ macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep2.filtered.hg19.bam -c CT-IN_S3.Rep2.fi
 macs2 callpeak -f BAMPE -t CT-IP_S1.Rep1.filtered.hg19.bam -c CT-IN_S3.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/CT-IP.Rep1 -n CT-IP.Rep1
 macs2 callpeak -f BAMPE -t CT-IP_S1.Rep2.filtered.hg19.bam -c CT-IN_S3.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/CT-IP.Rep2 -n CT-IP.Rep2
 '&
-
 ###Create a consensus file of bed peaks.
 #To perform differential analysis
 #deeptools bigwig with scale factors
