@@ -79,7 +79,9 @@ parallel --jobs 4 "macs2 callpeak -t {} -c CTRL_b_pp.bam -g 2652783500 --nomodel
 
 #single end DSB
 parallel --jobs 4 "macs2 callpeak -t {} -c merged_CTRL_a_pp_fwd.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ./Peaks_fwd.rev/peaks.fwd/" ::: *0_a_pp_fwd.bam
-
+parallel --jobs 4 "macs2 callpeak -t {} -c merged_CTRL_a_pp_rev.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ./Peaks_fwd.rev/peaks.rev/" ::: *0_a_pp_rev.bam
+parallel --jobs 4 "macs2 callpeak -t {} -c merged_CTRL_b_pp_fwd.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ./Peaks_fwd.rev/peaks.fwd/" ::: *0_b_pp_fwd.bam
+parallel --jobs 4 "macs2 callpeak -t {} -c merged_CTRL_b_pp_rev.bam -g 2864785220 --nomodel --nolambda -q 0.05 --keep-dup all -n {} -f BAMPE -B --outdir ./Peaks_fwd.rev/peaks.rev/" ::: *0_b_pp_rev.bam
 
 
 
