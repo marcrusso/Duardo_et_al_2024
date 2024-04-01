@@ -143,23 +143,28 @@ macs2 bdgpeakcall -i CT-H-IP_S2.Rep2.topeakcall.bdg -c 3 --outdir CT-H-IP_S2.Rep
 macs2 bdgpeakcall -i CT-IP_S1.Rep1.topeakcall.bdg -c 3 --outdir CT-IP_S1.Rep1 --o-prefix CT-IP_S1.Rep1
 macs2 bdgpeakcall -i CT-IP_S1.Rep2.topeakcall.bdg -c 3 --outdir CT-IP_S1.Rep2 --o-prefix CT-IP_S1.Rep2
 '&
-
 for i in *scaled.bdg
 do
   SAMPLE= $(basename $i .bdg)
   bedGraphtoBigwig $i hg19genome $SAMPLE.bw
 done
-#deeptools bigwig with scale factors
-BLACKLIST=Genome_Reference/hg19/hg19-blacklist.v2.bed
-bamCoverage -b 5-H-IP_S5.hg19.nodup.bam -o 5-H-IP_S5.hg19.nodup.bw --scaleFactor 42.30 -p max -bl $BLACKLIST
-bamCoverage -b 5-IN_S6.hg19.nodup.bam -o 5-IN_S6.hg19.nodup.bw --scaleFactor 9.91 -p max -bl $BLACKLIST
-bamCoverage -b 5-IP_S4.hg19.nodup.bam -o 5-IP_S4.hg19.nodup.bw --scaleFactor 24.18 -p max -bl $BLACKLIST
-bamCoverage -b 60-H-IP_S8.hg19.nodup.bam -o 60-H-IP_S8.hg19.nodup.bw --scaleFactor 21 -p max -bl $BLACKLIST
-bamCoverage -b 60-IN_S9.hg19.nodup.bam -o 60-IN_S9.hg19.nodup.bw --scaleFactor 11.44 -p max -bl $BLACKLIST
-bamCoverage -b 60-IP_S7.hg19.nodup.bam -o 60-IP_S7.hg19.nodup.bw --scaleFactor 28.74 -p max -bl $BLACKLIST
-bamCoverage -b CT-H-IP_S2.hg19.nodup.bam -o CT-H-IP_S2.hg19.nodup.bw --scaleFactor 62.32 -p max -bl $BLACKLIST
-bamCoverage -b CT-IN_S3.hg19.nodup.bam -o CT-IN_S3.hg19.nodup.bw --scaleFactor 6.73 -p max -bl $BLACKLIST
-bamCoverage -b CT-IP_S1.hg19.nodup.bam -o CT-IP_S1.hg19.nodup.bw --scaleFactor 41.55 -p max -bl $BLACKLIST
+
+#####################
+nohup sh -c ' '&
+bigwigCompare -b1 Signal_MACS/5-H-IP_S5.Rep1.scaled.bw  -b2 Signal_MACS/5-H-IP_S5.Rep2.scaled.bw --operation mean -p max -o 5-H-IP.bw
+bigwigCompare -b1 Signal_MACS/5-IP_S4.Rep1.scaled.bw  -b2 Signal_MACS/5-IP_S4.Rep2.scaled.bw --operation mean -p max -o 5-IP.bw
+bigwigCompare -b1 Signal_MACS/60-H-IP_S8.Rep1.scaled.bw -b2 Signal_MACS/60-H-IP_S8.Rep2.scaled.bw --operation mean -p max -o 60-H-IP.bw
+bigwigCompare -b1 Signal_MACS/60-IP_S7.Rep1.scaled.bw -b2 Signal_MACS/60-IP_S7.Rep2.scaled.bw --operation mean -p max -o 60-IP.bw
+bigwigCompare -b1 Signal_MACS/CT-H-IP_S2.Rep1.scaled.bw -b2 Signal_MACS/CT-H-IP_S2.Rep2.scaled.bw --operation mean -p max -o CT-H-IP.bw
+bigwigCompare -b1 Signal_MACS/CT-IP_S1.Rep1.scaled.bw -b2 Signal_MACS/CT-IP_S1.Rep2.scaled.bw --operation mean -p max -o CT-IP.bw
+################################
+
+
+
+
+
+
+##Differential analysis in R##
 ######DROPA
 cd Tools/DROPA
 python3 DROPA_v1.0.0.py -ref GeneReference/hg19_Ensembl/ -o Gain_Fast_Stable -ex GROtoDROPA.txt -shuffle 100 -gsize GeneReference/hg19.genome Gain_Fast_Stable.sorted.bed
