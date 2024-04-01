@@ -73,21 +73,82 @@ for f in *.bam ; do echo $f;echo $f >> all_counts &&  samtools view -c $f >> all
 awk '{printf "%s\t%s",$0,(NR%2?FS:RS)}' all_counts.txt > all_couns.tab.txt'
 &
 #####MACS peak calling on human
-mkdir MACS
+
+mkdir Signal_tracks
 nohup sh -c '
-macs2 callpeak -f BAMPE -t 5-H-IP_S5.Rep1.hg19.nodup.bam -c 5-IN_S6.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/5-H-IP.Rep1 -n 5-H-IP.Rep1
-macs2 callpeak -f BAMPE -t 5-H-IP_S5.Rep2.hg19.nodup.bam -c 5-IN_S6.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/5-H-IP.Rep2 -n 5-H-IP.Rep2
-macs2 callpeak -f BAMPE -t 60-H-IP_S8.Rep1.hg19.nodup.bam -c 60-IN_S9.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/60-H-IP.Rep1 -n 60-H-IP.Rep1
-macs2 callpeak -f BAMPE -t 60-H-IP_S8.Rep2.hg19.nodup.bam -c 60-IN_S9.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/60-H-IP.Rep2 -n 60-H-IP.Rep2
-macs2 callpeak -f BAMPE -t 5-IP_S4.Rep1.hg19.nodup.bam -c 5-IN_S6.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/5-IP.Rep1 -n 5-IP.Rep1
-macs2 callpeak -f BAMPE -t 5-IP_S4.Rep2.hg19.nodup.bam -c 5-IN_S6.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/5-IP.Rep2 -n 5-IP.Rep2
-macs2 callpeak -f BAMPE -t 60-IP_S7.Rep1.hg19.nodup.bam -c 60-IN_S9.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/60-IP.Rep1 -n 60-IP.Rep1
-macs2 callpeak -f BAMPE -t 60-IP_S7.Rep2.hg19.nodup.bam -c 60-IN_S9.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/60-IP.Rep2 -n 60-IP.Rep2
-macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep1.hg19.nodup.bam -c CT-IN_S3.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/CT-H-IP.Rep1 -n CT-H-IP.Rep1
-macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep2.hg19.nodup.bam -c CT-IN_S3.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/CT-H-IP.Rep2 -n CT-H-IP.Rep2
-macs2 callpeak -f BAMPE -t CT-IP_S1.Rep1.hg19.nodup.bam -c CT-IN_S3.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/CT-IP.Rep1 -n CT-IP.Rep1
-macs2 callpeak -f BAMPE -t CT-IP_S1.Rep2.hg19.nodup.bam -c CT-IN_S3.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/CT-IP.Rep2 -n CT-IP.Rep2
+for i in *.hg19.nodup.bam
+do
+SAMPLE=$(basename $i .hg19.nodup.bam)
+macs2 pileup -i $i -f BAMPE -o Signal_tracks/$SAMPLE.bdg
+done
 '&
+
+nohup sh -c '
+macs2 bdgopt -i 5-H-IP_S5.Rep1.bdg -m multiply -p 0.65200919 -o 5-H-IP_S5.Rep1.scaled.bdg
+macs2 bdgopt -i 5-H-IP_S5.Rep2.bdg -m multiply -p 0.160254485 -o 5-H-IP_S5.Rep2.scaled.bdg
+macs2 bdgopt -i 5-IP_S4.Rep1.bdg -m multiply -p 1.170921637 -o 5-IP_S4.Rep1.scaled.bdg
+macs2 bdgopt -i 5-IP_S4.Rep2.bdg -m multiply -p 0.438903194 -o 5-IP_S4.Rep2.scaled.bdg
+macs2 bdgopt -i 5-IN_S6.Rep1.bdg -m multiply -p 0.434874033 -o 5-IN_S6.Rep1.scaled.bdg
+macs2 bdgopt -i 5-IN_S6.Rep2.bdg -m multiply -p 0.285427429 -o 5-IN_S6.Rep2.scaled.bdg
+macs2 bdgcmp -t 5-H-IP_S5.Rep1.scaled.bdg -c 5-IN_S6.Rep1.scaled.bdg -m qpois -o 5-H-IP_S5.Rep1.topeakcall.bdg
+macs2 bdgcmp -t 5-H-IP_S5.Rep2.scaled.bdg -c 5-IN_S6.Rep2.scaled.bdg -m qpois -o 5-H-IP_S5.Rep2.topeakcall.bdg
+macs2 bdgcmp -t 5-IP_S4.Rep1.scaled.bdg -c 5-IN_S6.Rep1.scaled.bdg -m qpois -o 5-IP_S4.Rep1.topeakcall.bdg
+macs2 bdgcmp -t 5-IP_S4.Rep2.scaled.bdg -c 5-IN_S6.Rep2.scaled.bdg  -m qpois -o 5-IP_S4.Rep2.topeakcall.bdg
+macs2 bdgbroadcall -i 5-H-IP_S5.Rep1.topeakcall.bdg -c 3 --outdir 5-H-IP_S5.Rep1 --o-prefix 5-H-IP_S5.Rep1 -g 200 -G 1000
+macs2 bdgbroadcall -i 5-H-IP_S5.Rep2.topeakcall.bdg -c 3 --outdir 5-H-IP_S5.Rep2 --o-prefix 5-H-IP_S5.Rep2 -g 200 -G 1000
+macs2 bdgbroadcall -i 5-IP_S4.Rep1.topeakcall.bdg -c 3 --outdir 5-IP_S4.Rep1 --o-prefix 5-IP_S4.Rep1 -g 200 -G 1000
+macs2 bdgbroadcall -i 5-IP_S4.Rep2.topeakcall.bdg -c 3 --outdir 5-IP_S4.Rep2 --o-prefix 5-IP_S4.Rep2 -g 200 -G 1000
+macs2 bdgpeakcall -i 5-H-IP_S5.Rep1.topeakcall.bdg -c 3 --outdir 5-H-IP_S5.Rep1 --o-prefix 5-H-IP_S5.Rep1
+macs2 bdgpeakcall -i 5-H-IP_S5.Rep2.topeakcall.bdg -c 3 --outdir 5-H-IP_S5.Rep2 --o-prefix 5-H-IP_S5.Rep2
+macs2 bdgpeakcall -i 5-IP_S4.Rep1.topeakcall.bdg -c 3 --outdir 5-IP_S4.Rep1 --o-prefix 5-IP_S4.Rep1
+macs2 bdgpeakcall -i 5-IP_S4.Rep2.topeakcall.bdg -c 3 --outdir 5-IP_S4.Rep2 --o-prefix 5-IP_S4.Rep2
+'&
+nohup sh -c '
+macs2 bdgopt -i 60-H-IP_S8.Rep1.bdg -m multiply -p 1.456870091 -o 60-H-IP_S8.Rep1.scaled.bdg
+macs2 bdgopt -i 60-H-IP_S8.Rep2.bdg -m multiply -p 0.178424036 -o 60-H-IP_S8.Rep2.scaled.bdg
+macs2 bdgopt -i 60-IP_S7.Rep1.bdg -m multiply -p 1 -o 60-IP_S7.Rep1.scaled.bdg
+macs2 bdgopt -i 60-IP_S7.Rep2.bdg -m multiply -p 0.395534427 -o 60-IP_S7.Rep2.scaled.bdg
+macs2 bdgopt -i 60-IN_S9.Rep1.bdg -m multiply -p 0.373576459 -o 60-IN_S9.Rep1.scaled.bdg
+macs2 bdgopt -i 60-IN_S9.Rep2.bdg -m multiply -p 0.259185941 -o 60-IN_S9.Rep2.scaled.bdg
+macs2 bdgcmp -t 60-H-IP_S8.Rep1.scaled.bdg -c 60-IN_S9.Rep1.scaled.bdg -m qpois -o 60-H-IP_S8.Rep1.topeakcall.bdg
+macs2 bdgcmp -t 60-H-IP_S8.Rep2.scaled.bdg -c 60-IN_S9.Rep2.scaled.bdg -m qpois -o 60-H-IP_S8.Rep2.topeakcall.bdg
+macs2 bdgcmp -t 60-IP_S7.Rep1.scaled.bdg -c 60-IN_S9.Rep1.scaled.bdg -m qpois -o 60-IP_S7.Rep1.topeakcall.bdg
+macs2 bdgcmp -t 60-IP_S7.Rep2.scaled.bdg -c 60-IN_S9.Rep2.scaled.bdg  -m qpois -o 60-IP_S7.Rep2.topeakcall.bdg
+macs2 bdgbroadcall -i 60-H-IP_S8.Rep1.topeakcall.bdg -c 3 --outdir 60-H-IP_S8.Rep1 --o-prefix 60-H-IP_S8.Rep1 -g 200 -G 1000
+macs2 bdgbroadcall -i 60-H-IP_S8.Rep2.topeakcall.bdg -c 3 --outdir 60-H-IP_S8.Rep2 --o-prefix 60-H-IP_S8.Rep2 -g 200 -G 1000
+macs2 bdgbroadcall -i 60-IP_S7.Rep1.topeakcall.bdg -c 3 --outdir 60-IP_S7.Rep1 --o-prefix 60-IP_S7.Rep1 -g 200 -G 1000
+macs2 bdgbroadcall -i 60-IP_S7.Rep2.topeakcall.bdg -c 3 --outdir 60-IP_S7.Rep2 --o-prefix 60-IP_S7.Rep2 -g 200 -G 1000
+macs2 bdgpeakcall -i 60-H-IP_S8.Rep1.topeakcall.bdg -c 3 --outdir 60-H-IP_S8.Rep1 --o-prefix 60-H-IP_S8.Rep1
+macs2 bdgpeakcall -i 60-H-IP_S8.Rep2.topeakcall.bdg -c 3 --outdir 60-H-IP_S8.Rep2 --o-prefix 60-H-IP_S8.Rep2
+macs2 bdgpeakcall -i 60-IP_S7.Rep1.topeakcall.bdg -c 3 --outdir 60-IP_S7.Rep1 --o-prefix 60-IP_S7.Rep1
+macs2 bdgpeakcall -i 60-IP_S7.Rep2.topeakcall.bdg -c 3 --outdir 60-IP_S7.Rep2 --o-prefix 60-IP_S7.Rep2
+'&
+nohup sh -c '
+macs2 bdgopt -i CT-H-IP_S2.Rep1.bdg -m multiply -p 0.439454171 -o CT-H-IP_S2.Rep1.scaled.bdg
+macs2 bdgopt -i CT-H-IP_S2.Rep2.bdg -m multiply -p 0.102144009 -o CT-H-IP_S2.Rep2.scaled.bdg
+macs2 bdgopt -i CT-IP_S1.Rep1.bdg -m multiply -p 0.677663401 -o CT-IP_S1.Rep1.scaled.bdg
+macs2 bdgopt -i CT-IP_S1.Rep2.bdg -m multiply -p 0.39306033 -o CT-IP_S1.Rep2.scaled.bdg
+macs2 bdgopt -i CT-IN_S3.Rep1.bdg -m multiply -p 0.617261648 -o CT-IN_S3.Rep1.scaled.bdg
+macs2 bdgopt -i CT-IN_S3.Rep2.bdg -m multiply -p 0.183994298 -o CT-IN_S3.Rep2.scaled.bdg
+macs2 bdgcmp -t CT-H-IP_S2.Rep1.scaled.bdg -c CT-IN_S3.Rep1.scaled.bdg -m qpois -o CT-H-IP_S2.Rep1.topeakcall.bdg
+macs2 bdgcmp -t CT-H-IP_S2.Rep2.scaled.bdg -c CT-IN_S3.Rep2.scaled.bdg -m qpois -o CT-H-IP_S2.Rep2.topeakcall.bdg
+macs2 bdgcmp -t CT-IP_S1.Rep1.scaled.bdg -c CT-IN_S3.Rep1.scaled.bdg -m qpois -o CT-IP_S1.Rep1.topeakcall.bdg
+macs2 bdgcmp -t CT-IP_S1.Rep2.scaled.bdg -c CT-IN_S3.Rep2.scaled.bdg  -m qpois -o CT-IP_S1.Rep2.topeakcall.bdg
+macs2 bdgbroadcall -i CT-H-IP_S2.Rep1.topeakcall.bdg -c 3 --outdir CT-H-IP_S2.Rep1 --o-prefix CT-H-IP_S2.Rep1 -g 200 -G 1000
+macs2 bdgbroadcall -i CT-H-IP_S2.Rep2.topeakcall.bdg -c 3 --outdir CT-H-IP_S2.Rep2 --o-prefix CT-H-IP_S2.Rep2 -g 200 -G 1000
+macs2 bdgbroadcall -i CT-IP_S1.Rep1.topeakcall.bdg -c 3 --outdir CT-IP_S1.Rep1 --o-prefix CT-IP_S1.Rep1 -g 200 -G 1000
+macs2 bdgbroadcall -i CT-IP_S1.Rep2.topeakcall.bdg -c 3 --outdir CT-IP_S1.Rep2 --o-prefix CT-IP_S1.Rep2 -g 200 -G 1000
+macs2 bdgpeakcall -i CT-H-IP_S2.Rep1.topeakcall.bdg -c 3 --outdir CT-H-IP_S2.Rep1 --o-prefix CT-H-IP_S2.Rep1
+macs2 bdgpeakcall -i CT-H-IP_S2.Rep2.topeakcall.bdg -c 3 --outdir CT-H-IP_S2.Rep2 --o-prefix CT-H-IP_S2.Rep2
+macs2 bdgpeakcall -i CT-IP_S1.Rep1.topeakcall.bdg -c 3 --outdir CT-IP_S1.Rep1 --o-prefix CT-IP_S1.Rep1
+macs2 bdgpeakcall -i CT-IP_S1.Rep2.topeakcall.bdg -c 3 --outdir CT-IP_S1.Rep2 --o-prefix CT-IP_S1.Rep2
+'&
+
+for i in *scaled.bdg
+do
+  SAMPLE= $(basename $i .bdg)
+  bedGraphtoBigwig $i hg19genome $SAMPLE.bw
+done
 #deeptools bigwig with scale factors
 BLACKLIST=Genome_Reference/hg19/hg19-blacklist.v2.bed
 bamCoverage -b 5-H-IP_S5.hg19.nodup.bam -o 5-H-IP_S5.hg19.nodup.bw --scaleFactor 42.30 -p max -bl $BLACKLIST
