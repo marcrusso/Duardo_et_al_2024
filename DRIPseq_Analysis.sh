@@ -44,22 +44,6 @@ do
   samtools idxstats -@ $THR Align/$HEAD.bam > Align/$HEAD.idxstat
 done
 '&
-###########QUALITY FILTER
-for i in *.bam
-do
-SAMPLE=$(basename $i .bam)
-samtools view -q 10 -h $i  | awk 'substr($0,1,1)=="@" || ($9>= 60 && $9<=900) || ($9<=-60 && $9>=-900)' | samtools view -b > $SAMPLE.filtered.bam
-samtools index -@ 8 $SAMPLE.filtered.bam
-done
-nohup sh -c '
-for i in *filtered.bam
-do
-SAMPLE=$(basename $i .bam)
-samtools stats -@ 8 $SAMPLE.bam > $SAMPLE.stats
-samtools flagstat -@ 8 $SAMPLE.bam > $SAMPLE.flagstat
-samtools idxstats -@ 8  $SAMPLE.bam > $SAMPLE.idxstat
-done
-' &
 ############################################ Genome splitting
 nohup sh -c '
 hg19_genome=Genome_Reference/hg19_sacCer3/hg19.genome.bed
@@ -91,21 +75,19 @@ awk '{printf "%s\t%s",$0,(NR%2?FS:RS)}' all_counts.txt > all_couns.tab.txt'
 #####MACS peak calling on human
 mkdir MACS
 nohup sh -c '
-macs2 callpeak -f BAMPE -t 5-H-IP_S5.Rep1.filtered.hg19.bam -c 5-IN_S6.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/5-H-IP.Rep1 -n 5-H-IP.Rep1
-macs2 callpeak -f BAMPE -t 5-H-IP_S5.Rep2.filtered.hg19.bam -c 5-IN_S6.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/5-H-IP.Rep2 -n 5-H-IP.Rep2
-macs2 callpeak -f BAMPE -t 60-H-IP_S8.Rep1.filtered.hg19.bam -c 60-IN_S9.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/60-H-IP.Rep1 -n 60-H-IP.Rep1
-macs2 callpeak -f BAMPE -t 60-H-IP_S8.Rep2.filtered.hg19.bam -c 60-IN_S9.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/60-H-IP.Rep2 -n 60-H-IP.Rep2
-macs2 callpeak -f BAMPE -t 5-IP_S4.Rep1.filtered.hg19.bam -c 5-IN_S6.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/5-IP.Rep1 -n 5-IP.Rep1
-macs2 callpeak -f BAMPE -t 5-IP_S4.Rep2.filtered.hg19.bam -c 5-IN_S6.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/5-IP.Rep2 -n 5-IP.Rep2
-macs2 callpeak -f BAMPE -t 60-IP_S7.Rep1.filtered.hg19.bam -c 60-IN_S9.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/60-IP.Rep1 -n 60-IP.Rep1
-macs2 callpeak -f BAMPE -t 60-IP_S7.Rep2.filtered.hg19.bam -c 60-IN_S9.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/60-IP.Rep2 -n 60-IP.Rep2
-macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep1.filtered.hg19.bam -c CT-IN_S3.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/CT-H-IP.Rep1 -n CT-H-IP.Rep1
-macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep2.filtered.hg19.bam -c CT-IN_S3.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/CT-H-IP.Rep2 -n CT-H-IP.Rep2
-macs2 callpeak -f BAMPE -t CT-IP_S1.Rep1.filtered.hg19.bam -c CT-IN_S3.Rep1.filtered.hg19.bam -g hs -B --outdir MACS/CT-IP.Rep1 -n CT-IP.Rep1
-macs2 callpeak -f BAMPE -t CT-IP_S1.Rep2.filtered.hg19.bam -c CT-IN_S3.Rep2.filtered.hg19.bam -g hs -B --outdir MACS/CT-IP.Rep2 -n CT-IP.Rep2
+macs2 callpeak -f BAMPE -t 5-H-IP_S5.Rep1.hg19.nodup.bam -c 5-IN_S6.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/5-H-IP.Rep1 -n 5-H-IP.Rep1
+macs2 callpeak -f BAMPE -t 5-H-IP_S5.Rep2.hg19.nodup.bam -c 5-IN_S6.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/5-H-IP.Rep2 -n 5-H-IP.Rep2
+macs2 callpeak -f BAMPE -t 60-H-IP_S8.Rep1.hg19.nodup.bam -c 60-IN_S9.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/60-H-IP.Rep1 -n 60-H-IP.Rep1
+macs2 callpeak -f BAMPE -t 60-H-IP_S8.Rep2.hg19.nodup.bam -c 60-IN_S9.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/60-H-IP.Rep2 -n 60-H-IP.Rep2
+macs2 callpeak -f BAMPE -t 5-IP_S4.Rep1.hg19.nodup.bam -c 5-IN_S6.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/5-IP.Rep1 -n 5-IP.Rep1
+macs2 callpeak -f BAMPE -t 5-IP_S4.Rep2.hg19.nodup.bam -c 5-IN_S6.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/5-IP.Rep2 -n 5-IP.Rep2
+macs2 callpeak -f BAMPE -t 60-IP_S7.Rep1.hg19.nodup.bam -c 60-IN_S9.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/60-IP.Rep1 -n 60-IP.Rep1
+macs2 callpeak -f BAMPE -t 60-IP_S7.Rep2.hg19.nodup.bam -c 60-IN_S9.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/60-IP.Rep2 -n 60-IP.Rep2
+macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep1.hg19.nodup.bam -c CT-IN_S3.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/CT-H-IP.Rep1 -n CT-H-IP.Rep1
+macs2 callpeak -f BAMPE -t CT-H-IP_S2.Rep2.hg19.nodup.bam -c CT-IN_S3.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/CT-H-IP.Rep2 -n CT-H-IP.Rep2
+macs2 callpeak -f BAMPE -t CT-IP_S1.Rep1.hg19.nodup.bam -c CT-IN_S3.Rep1.hg19.nodup.bam -g hs -B --outdir MACS/CT-IP.Rep1 -n CT-IP.Rep1
+macs2 callpeak -f BAMPE -t CT-IP_S1.Rep2.hg19.nodup.bam -c CT-IN_S3.Rep2.hg19.nodup.bam -g hs -B --outdir MACS/CT-IP.Rep2 -n CT-IP.Rep2
 '&
-###Create a consensus file of bed peaks.
-#To perform differential analysis
 #deeptools bigwig with scale factors
 BLACKLIST=Genome_Reference/hg19/hg19-blacklist.v2.bed
 bamCoverage -b 5-H-IP_S5.hg19.nodup.bam -o 5-H-IP_S5.hg19.nodup.bw --scaleFactor 42.30 -p max -bl $BLACKLIST
@@ -127,7 +109,8 @@ python3 DROPA_v1.0.0.py -ref GeneReference/hg19_Ensembl/ -o Loss_Fast_Trans -ex 
 python3 DROPA_v1.0.0.py -ref GeneReference/hg19_Ensembl/ -o Loss_Slow -ex GROtoDROPA.txt -shuffle 100 -gsize GeneReference/hg19.genome Loss_Slow.sorted.bed
 python3 DROPA_v1.0.0.py -ref GeneReference/hg19_Ensembl/ -o NoChange -ex GROtoDROPA.txt -shuffle 100 -gsize GeneReference/hg19.genome NoChange.sorted.bed
 python3 DROPA_v1.0.0.py -ref GeneReference/hg19_Ensembl/ -o AllPeaks -ex GROtoDROPA.txt -shuffle 100 -gsize GeneReference/hg19.genome All.Peaks.sorted.bed
-###Metaplots
+
+###Metaplot base scripts
 ####DRIP_plot centered on peak center 
 BLACKLIST=Genome_Reference/hg19/hg19-blacklist.v2.bed
 SAMPLELIST=$(ls Deeptools/*IP.bw)
@@ -135,7 +118,7 @@ Sample_bed=$(ls  Deeptools/*bed)
 computeMatrix reference-point -S $SAMPLELIST -R $Sample_bed -o out.mtx -bl $BLACKLIST -bs 50 -b 3000 -a 3000 --smartLabels -p max --missingDataAsZero --referencePoint center
 plotHeatmap -m out.mtx -out DRIP.pdf --plotType se --perGroup --colorList 'white,darkred' 
 ##################
-####DRP_plot centered on RSS
+####DRIP_plot centered on RSS
 BLACKLIST=Genome_Reference/hg19/hg19-blacklist.v2.bed
 SAMPLELIST=$(ls Deeptools/*IP.bw)
 Sample_bed=$(ls  Deeptools/*bed)
