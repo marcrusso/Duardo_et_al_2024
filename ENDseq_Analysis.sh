@@ -86,3 +86,22 @@ parallel --jobs 4 "macs2 callpeak -t {} -c merged_CTRL_b_pp_rev.bam -g 286478522
 
 
 
+# BW with orientation 
+PERCORSO_BAM="/mnt/d/END-Seq/BAM_files_hg19/MAPQ_filtered_BAM/PP_BAM_MAPQ/FW_REV/Merged_fw.rev/"
+BLACKLIST="/mnt/d/END-Seq/"
+OUTPUT="/mnt/d/END-Seq/BAM_files_hg19/MAPQ_filtered_BAM/PP_BAM_MAPQ/Bigwig_new"
+bamCoverage --bam $PERCORSO_BAM/merged_CPT10_a_pp_fwd.bam -p 8 --scaleFactor 0.427412908 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT10.a.fw.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT10_a_pp_rev.bam -p 8 --scaleFactor 0.427412908 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT10.a.rev.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT20_a_pp_fwd.bam -p 8 --scaleFactor 0.702165267 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT20.a.fw.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT20_a_pp_rev.bam -p 8 --scaleFactor 0.702165267 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT20.a.rev.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CTRL_a_pp_fwd.bam -p 8 --scaleFactor 0.606158929 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CTRL.a.fwd.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CTRL_a_pp_rev.bam -p 8 --scaleFactor 0.606158929 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CTRL.a.rev.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT10_b_pp_fwd.bam -p 8 --scaleFactor 1 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT10.b.fwd.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT10_b_pp_rev.bam -p 8 --scaleFactor 1 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT10.b.rev.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT20_b_pp_fwd.bam -p 8 --scaleFactor 0.611025701 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT20.b.fwd.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CPT20_b_pp_rev.bam -p 8 --scaleFactor 0.611025701 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CPT20.b.rev.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CTRL_b_pp_fwd.bam -p 8 --scaleFactor 0.509311971 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CTRL.b.fwd.new.bw
+bamCoverage --bam $PERCORSO_BAM/merged_CTRL_b_pp_rev.bam -p 8 --scaleFactor 0.509311971 -bl $BLACKLIST/hg19-blacklist.v2.bed -bs 10 -o $OUTPUT/CTRL.b.rev.new.bw
+ 
+
+
